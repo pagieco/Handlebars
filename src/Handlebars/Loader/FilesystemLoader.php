@@ -1,29 +1,16 @@
 <?php
-/**
- *
- * @category  Xamin
- * @package   Handlebars
- * @author    fzerorubigd <fzerorubigd@gmail.com>
- * @author    Behrooz Shabani <everplays@gmail.com>
- * @author    Craig Bass <craig@clearbooks.co.uk>
- * @author    ^^         <craig@devls.co.uk>
- * @copyright 2012 (c) ParsPooyesh Co
- * @copyright 2013 (c) Behrooz Shabani
- * @license   MIT
- * @link      http://voodoophp.org/docs/handlebars
- */
 
-namespace Handlebars\Loader;
-use Handlebars\Loader;
-use Handlebars\HandlebarsString;
+namespace Pagieco\Handlebars\Loader;
 
+use Pagieco\Handlebars\Loader;
+use Pagieco\Handlebars\HandlebarsString;
 
 class FilesystemLoader implements Loader
 {
-    private $_baseDir;
-    private $_extension = '.handlebars';
-    private $_prefix = '';
-    private $_templates = array();
+    private string $_baseDir;
+    private string $_extension = '.handlebars';
+    private string $_prefix = '';
+    private array $_templates = [];
 
     /**
      * Handlebars filesystem Loader constructor.
@@ -35,25 +22,26 @@ class FilesystemLoader implements Loader
      *         'extension' => '.other',
      *     );
      *
-     * @param string|array $baseDirs A path contain template files or array of paths
-     * @param array        $options  Array of Loader options (default: array())
+     * @param  string|array $baseDirs A path contain template files or array of paths
+     * @param  array $options Array of Loader options (default: array())
      *
      * @throws \RuntimeException if $baseDir does not exist.
      */
-    public function __construct($baseDirs, Array $options = [])
+    public function __construct(string $baseDirs, array $options = [])
     {
         if (is_string($baseDirs)) {
-            $baseDirs = array(rtrim(realpath($baseDirs), '/'));
+            $baseDirs = [rtrim(realpath($baseDirs), '/')];
         } else {
             foreach ($baseDirs as &$dir) {
                 $dir = rtrim(realpath($dir), '/');
-            } unset( $dir );
+            }
+            unset($dir);
         }
 
         $this->_baseDir = $baseDirs;
 
         foreach ($this->_baseDir as $dir) {
-            if (!is_dir($dir)) {
+            if (! is_dir($dir)) {
                 throw new \RuntimeException(
                     'FilesystemLoader baseDir must be a directory: ' . $dir
                 );
@@ -76,13 +64,12 @@ class FilesystemLoader implements Loader
      *     // loads "./views/admin/dashboard.handlebars";
      *     $loader->load('admin/dashboard');
      *
-     * @param string $name template name
-     *
-     * @return HandlebarsString Handlebars Template source
+     * @param  string $name
+     * @return \Pagieco\Handlebars\HandlebarsString
      */
-    public function load($name)
+    public function load(string $name): HandlebarsString
     {
-        if (!isset($this->_templates[$name])) {
+        if (! isset($this->_templates[$name])) {
             $this->_templates[$name] = $this->loadFile($name);
         }
 
@@ -92,12 +79,11 @@ class FilesystemLoader implements Loader
     /**
      * Helper function for loading a Handlebars file by name.
      *
-     * @param string $name template name
-     *
-     * @throws \InvalidArgumentException if a template file is not found.
-     * @return string Handlebars Template source
+     * @param  string $name
+     * @return string
+     * @throws \InvalidArgumentException
      */
-    protected function loadFile($name)
+    protected function loadFile(string $name): string
     {
         $fileName = $this->getFileName($name);
 
@@ -111,11 +97,10 @@ class FilesystemLoader implements Loader
     /**
      * Helper function for getting a Handlebars template file name.
      *
-     * @param string $name template name
-     *
-     * @return string Template file name
+     * @param  string $name
+     * @return string
      */
-    protected function getFileName($name)
+    protected function getFileName(string $name): string
     {
         foreach ($this->_baseDir as $baseDir) {
             $fileName = $baseDir . '/';
@@ -133,6 +118,7 @@ class FilesystemLoader implements Loader
             if ($lastCharacters !== $this->_extension) {
                 $fileName .= $this->_extension;
             }
+
             if (file_exists($fileName)) {
                 return $fileName;
             }
@@ -140,5 +126,4 @@ class FilesystemLoader implements Loader
 
         return false;
     }
-
 }

@@ -1,36 +1,14 @@
 <?php
-/**
- * Handlebars Template string Loader implementation.
- *
- * @category  Xamin
- * @package   Handlebars
- * @author    fzerorubigd <fzerorubigd@gmail.com>
- * @author    Behrooz Shabani <everplays@gmail.com>
- * @author    Mardix <https://github.com/mardix>
- * @copyright 2012 (c) ParsPooyesh Co
- * @copyright 2013 (c) Behrooz Shabani
- * @copyright 2013 (c) Mardix
- * @license   MIT
- * @link      http://voodoophp.org/docs/handlebars
- */
 
-namespace Handlebars\Loader;
-use Handlebars\Loader;
-use Handlebars\HandlebarsString;
+namespace Pagieco\Handlebars\Loader;
+
+use Pagieco\Handlebars\Loader;
+use Pagieco\Handlebars\HandlebarsString;
 
 class StringLoader implements Loader
 {
-
-    /**
-     * Load a Template by source.
-     *
-     * @param string $name Handlebars Template source
-     *
-     * @return HandlebarsString Handlebars Template source
-     */
-    public function load($name)
+    public function load(string $name): HandlebarsString
     {
         return new HandlebarsString($name);
     }
-
 }

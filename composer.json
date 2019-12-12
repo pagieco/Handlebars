@@ -1,5 +1,5 @@
 {
-    "name": "voodoophp/handlebars",
+    "name": "pagieco/handlebars",
     "description": "Handlebars processor for php",
     "homepage": "http://voodoophp.org/docs/handlebars",
     "keywords": ["templating", "mustache", "handlebars"],
@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=7.4.0"
     },
     "autoload": {
         "psr-0": {

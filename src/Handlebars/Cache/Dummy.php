@@ -1,48 +1,36 @@
 <?php
-/**
- * A dummy array cache
- *
- * @category  Xamin
- * @package   Handlebars
- * @author    fzerorubigd <fzerorubigd@gmail.com>
- * @author    Behrooz Shabani <everplays@gmail.com>
- * @copyright 2012 (c) ParsPooyesh Co
- * @copyright 2013 (c) Behrooz Shabani
- * @license   MIT
- * @link      http://voodoophp.org/docs/handlebars
- */
 
-namespace Handlebars\Cache;
-use Handlebars\Cache;
+namespace Pagieco\Handlebars\Cache;
+
+use Pagieco\Handlebars\Cache;
 
 class Dummy implements Cache
 {
-    private $cache = [];
+    private array $cache = [];
 
     /**
      * Get cache for $name if exist.
      *
-     * @param string $name Cache id
-     *
-     * @return mixed data on hit, boolean false on cache not found
+     * @param  string $name
+     * @return mixed
      */
-    public function get($name)
+    public function get(string $name)
     {
         if (array_key_exists($name, $this->cache)) {
             return $this->cache[$name];
         }
+
         return false;
     }
 
     /**
      * Set a cache
      *
-     * @param string $name  cache id
-     * @param mixed  $value data to store
-     *
+     * @param  string $name
+     * @param  mixed $value
      * @return void
      */
-    public function set($name, $value)
+    public function set(string $name, $value): void
     {
         $this->cache[$name] = $value;
     }
@@ -50,13 +38,11 @@ class Dummy implements Cache
     /**
      * Remove cache
      *
-     * @param string $name Cache id
-     *
+     * @param  string $name
      * @return void
      */
-    public function remove($name)
+    public function remove(string $name): void
     {
         unset($this->cache[$name]);
     }
-
 }

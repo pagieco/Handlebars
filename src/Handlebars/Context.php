@@ -1,46 +1,21 @@
 <?php
-/**
- * Handlebars context
- * Context for a template
- *
- * @category  Xamin
- * @package   Handlebars
- * @author    fzerorubigd <fzerorubigd@gmail.com>
- * @author    Behrooz Shabani <everplays@gmail.com>
- * @author    Mardix <https://github.com/mardix>
- * @copyright 2012 (c) ParsPooyesh Co
- * @copyright 2013 (c) Behrooz Shabani
- * @copyright 2013 (c) Mardix
- * @license   MIT
- * @link      http://voodoophp.org/docs/handlebars
- */
 
-namespace Handlebars;
+namespace Pagieco\Handlebars;
 
 use InvalidArgumentException;
 
 class Context
 {
+    protected array $stack = [];
 
-    /**
-     * @var array stack for context only top stack is available
-     */
-    protected $stack = [];
+    protected array $index = [];
 
-    /**
-     * @var array index stack for sections
-     */
-    protected $index = [];
-
-    /**
-     * @var array key stack for objects
-     */
-    protected $key = [];
+    protected array $key = [];
 
     /**
      * Mustache rendering Context constructor.
      *
-     * @param mixed $context Default rendering context (default: null)
+     * @param  mixed $context
      */
     public function __construct($context = null)
     {
@@ -52,43 +27,40 @@ class Context
     /**
      * Push a new Context frame onto the stack.
      *
-     * @param mixed $value Object or array to use for context
-     *
+     * @param  mixed $value
      * @return void
      */
-    public function push($value)
+    public function push($value): void
     {
-        array_push($this->stack, $value);
+        $this->stack[] = $value;
     }
 
     /**
      * Push an Index onto the index stack
      *
-     * @param integer $index Index of the current section item.
-     *
+     * @param  integer $index
      * @return void
      */
-    public function pushIndex($index)
+    public function pushIndex($index): void
     {
-        array_push($this->index, $index);
+        $this->index[] = $index;
     }
 
     /**
      * Push a Key onto the key stack
      *
-     * @param string $key Key of the current object property.
-     *
+     * @param  string $key
      * @return void
      */
-    public function pushKey($key)
+    public function pushKey(string $key): void
     {
-        array_push($this->key, $key);
+        $this->key[] = $key;
     }
 
     /**
      * Pop the last Context frame from the stack.
      *
-     * @return mixed Last Context frame (object or array)
+     * @return mixed
      */
     public function pop()
     {
@@ -98,9 +70,9 @@ class Context
     /**
      * Pop the last index from the stack.
      *
-     * @return int Last index
+     * @return int
      */
-    public function popIndex()
+    public function popIndex(): int
     {
         return array_pop($this->index);
     }
@@ -108,9 +80,9 @@ class Context
     /**
      * Pop the last key from the stack.
      *
-     * @return string Last key
+     * @return string
      */
-    public function popKey()
+    public function popKey(): string
     {
         return array_pop($this->key);
     }
@@ -118,7 +90,7 @@ class Context
     /**
      * Get the last Context frame.
      *
-     * @return mixed Last Context frame (object or array)
+     * @return mixed
      */
     public function last()
     {
@@ -128,7 +100,7 @@ class Context
     /**
      * Get the index of current section item.
      *
-     * @return mixed Last index
+     * @return mixed
      */
     public function lastIndex()
     {
@@ -138,7 +110,7 @@ class Context
     /**
      * Get the key of current object property.
      *
-     * @return mixed Last key
+     * @return mixed
      */
     public function lastKey()
     {
@@ -148,11 +120,10 @@ class Context
     /**
      * Change the current context to one of current context members
      *
-     * @param string $variableName name of variable or a callable on current context
-     *
-     * @return mixed actual value
+     * @param  string $variableName
+     * @return mixed
      */
-    public function with($variableName)
+    public function with(string $variableName)
     {
         $value = $this->get($variableName);
         $this->push($value);
@@ -165,87 +136,95 @@ class Context
      * Supported types :
      * variable , ../variable , variable.variable , .
      *
-     * @param string  $variableName variavle name to get from current context
-     * @param boolean $strict       strict search? if not found then throw exception
-     *
-     * @throws InvalidArgumentException in strict mode and variable not found
+     * @param  string $variableName
+     * @param  boolean $strict
      * @return mixed
+     * @throws InvalidArgumentException
      */
-    public function get($variableName, $strict = false)
+    public function get(string $variableName, bool $strict = false)
     {
         //Need to clean up
         $variableName = trim($variableName);
         $level = 0;
-        while (substr($variableName, 0, 3) == '../') {
+
+        while (strpos($variableName, '../') === 0) {
             $variableName = trim(substr($variableName, 3));
             $level++;
         }
+
         if (count($this->stack) < $level) {
             if ($strict) {
-                throw new InvalidArgumentException(
-                    'can not find variable in context'
-                );
+                throw new InvalidArgumentException('can not find variable in context');
             }
 
             return '';
         }
+
         end($this->stack);
+
         while ($level) {
             prev($this->stack);
             $level--;
         }
+
         $current = current($this->stack);
-        if (!$variableName) {
+
+        if (! $variableName) {
             if ($strict) {
-                throw new InvalidArgumentException(
-                    'can not find variable in context'
-                );
+                throw new InvalidArgumentException('can not find variable in context');
             }
             return '';
-        } elseif ($variableName == '.' || $variableName == 'this') {
-            return $current;
-        } else {
-            $chunks = explode('.', $variableName);
-            foreach ($chunks as $chunk) {
-                if (is_string($current) and $current == '') {
-                    return $current;
-                }
-                $current = $this->findVariableInContext($current, $chunk, $strict);
-            }
         }
+
+        if ($variableName === '.' || $variableName === 'this') {
+            return $current;
+        }
+
+        $chunks = explode('.', $variableName);
+
+        foreach ($chunks as $chunk) {
+            if (is_string($current) && $current === '') {
+                return $current;
+            }
+
+            $current = $this->findVariableInContext($current, $chunk, $strict);
+        }
+
         return $current;
     }
 
     /**
      * Check if $variable->$inside is available
      *
-     * @param mixed   $variable variable to check
-     * @param string  $inside   property/method to check
-     * @param boolean $strict   strict search? if not found then throw exception
-     *
-     * @throws \InvalidArgumentException in strict mode and variable not found
-     * @return boolean true if exist
+     * @param  mixed $variable
+     * @param  string $inside
+     * @param  boolean $strict
+     * @return boolean
+     * @throws \InvalidArgumentException
      */
-    private function findVariableInContext($variable, $inside, $strict = false)
+    private function findVariableInContext($variable, string $inside, bool $strict = false): bool
     {
         $value = '';
-        if (($inside !== '0' && empty($inside)) || ($inside == 'this')) {
+        if (($inside !== '0' && empty($inside)) || ($inside === 'this')) {
             return $variable;
-        } elseif (is_array($variable)) {
+        }
+
+        if (is_array($variable)) {
             if (isset($variable[$inside])) {
                 $value = $variable[$inside];
             }
-        } elseif (is_object($variable)) {
+        } else if (is_object($variable)) {
             if (isset($variable->$inside)) {
                 $value = $variable->$inside;
-            } elseif (is_callable(array($variable, $inside))) {
-                $value = call_user_func(array($variable, $inside));
+            } else if (is_callable([$variable, $inside])) {
+                $value = $variable->$inside();
             }
-        } elseif ($inside === '.') {
+        } else if ($inside === '.') {
             $value = $variable;
-        } elseif ($strict) {
+        } else if ($strict) {
             throw new InvalidArgumentException('can not find variable in context');
         }
+
         return $value;
     }
 }
